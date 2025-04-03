@@ -5,15 +5,19 @@ public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 2f;
     public float jumpForce = 2f;
-
-    private float moveDirection;
+    public LayerMask whatIsGround;
     
+    private float moveDirection;
+    public bool isGrounded;
+
+    private Animator animator;
     private Rigidbody2D playerRb;
     private SpriteRenderer spriteRenderer;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        animator = GetComponent<Animator>();
         playerRb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
@@ -24,6 +28,8 @@ public class PlayerController : MonoBehaviour
         // Left/Right movement
         playerRb.linearVelocityX
             = moveDirection * moveSpeed;
+        
+        GroundCheck();
     }
 
     // Left and right movement
@@ -38,6 +44,9 @@ public class PlayerController : MonoBehaviour
         {
             spriteRenderer.flipX = (input.x < 0);
         }
+        
+        // set the animator boolean to true or false
+        animator.SetBool("Is Moving", moveDirection != 0);
     }
 
     private void OnJump(InputValue value)
@@ -45,5 +54,19 @@ public class PlayerController : MonoBehaviour
         // Ensures that the character always
         // jumps at a specific speed
         playerRb.linearVelocityY = jumpForce;
+    }
+
+    private void GroundCheck()
+    {
+        RaycastHit2D hit = Physics2D.BoxCast(
+            transform.position,
+            Vector2.one * 0.1f,
+            0,
+            Vector2.down,
+            0.2f,
+            whatIsGround.value
+            );
+
+        isGrounded = hit.collider != null;
     }
 }

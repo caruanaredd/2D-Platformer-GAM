@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     
     private float moveDirection;
     public bool isGrounded;
+    public bool canDoubleJump;
 
     private Animator animator;
     private Rigidbody2D playerRb;
@@ -26,10 +27,13 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         // Left/Right movement
-        playerRb.linearVelocityX
-            = moveDirection * moveSpeed;
+        playerRb.linearVelocityX = moveDirection * moveSpeed;
         
         GroundCheck();
+        
+        animator.SetBool("Is Grounded", isGrounded);
+        animator.SetBool("Is Double Jumping", canDoubleJump == false);
+        animator.SetFloat("Velocity Y", playerRb.linearVelocityY);
     }
 
     // Left and right movement
@@ -51,9 +55,17 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump(InputValue value)
     {
-        // Ensures that the character always
-        // jumps at a specific speed
-        playerRb.linearVelocityY = jumpForce;
+        if (canDoubleJump == true)
+        {
+            // Ensures that the character always
+            // jumps at a specific speed
+            playerRb.linearVelocityY = jumpForce;
+        }
+
+        if (isGrounded == false && canDoubleJump)
+        {
+            canDoubleJump = false;
+        }
     }
 
     private void GroundCheck()
@@ -68,5 +80,10 @@ public class PlayerController : MonoBehaviour
             );
 
         isGrounded = hit.collider != null;
+
+        if (isGrounded)
+        {
+            canDoubleJump = true;
+        }
     }
 }
